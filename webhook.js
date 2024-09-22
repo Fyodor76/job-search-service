@@ -6,7 +6,7 @@ const { exec } = require('child_process');
 const app = express();
 app.use(express.json());
 
-app.post('/webhook', (req) => {
+app.post('/webhook', (req, res) => {
   console.log('Received webhook:', req.body);
   exec(
     'git pull && docker-compose down && docker-compose up -d',
@@ -23,7 +23,7 @@ app.post('/webhook', (req) => {
     },
   );
 
-  return 'Hook has completed its work';
+  return res.send('Hook has completed its work');
 });
 
 const PORT = 8081;
