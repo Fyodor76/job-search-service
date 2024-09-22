@@ -8,6 +8,7 @@ app.use(express.json());
 
 app.post('/webhook', (req, res) => {
   console.log('Received webhook:', req.body);
+
   exec(
     'git pull && docker-compose down && docker-compose up -d',
     (error, stdout, stderr) => {
@@ -26,7 +27,13 @@ app.post('/webhook', (req, res) => {
         console.error(`Error output: ${stderr}`);
       }
 
-      return res.send('Hook has completed its work');
+      if (req.body) {
+        if (Object.keys(req.body)) {
+          res.send(req.body);
+        } else {
+          return res.send('Hook has completed its work');
+        }
+      }
     },
   );
 });
