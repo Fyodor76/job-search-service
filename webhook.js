@@ -9,12 +9,21 @@ app.use(express.json());
 app.post('/webhook', (req, res) => {
   console.log('Received webhook:', req.body);
 
+  // Немедленно отправляем ответ, чтобы не ждать завершения команд
+  res
+    .status(200)
+    .send(
+      'Webhook received, processing in background',
+      JSON.stringify(req.body),
+    );
+
+  // Выполняем команды асинхронно в фоне
   exec(
     'git pull && docker-compose down && docker-compose up -d',
     (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing command: ${error.message}`);
-        return res.status(500).send('Internal Server Error');
+        return;
       }
 
       // Обработка стандартного вывода
@@ -25,14 +34,6 @@ app.post('/webhook', (req, res) => {
       // Обработка стандартного вывода ошибок (если он есть)
       if (stderr) {
         console.error(`Error output: ${stderr}`);
-      }
-
-      if (req.body) {
-        if (Object.keys(req.body)) {
-          res.send(req.body);
-        } else {
-          return res.send('Hook has completed its work');
-        }
       }
     },
   );
