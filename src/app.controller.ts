@@ -21,7 +21,7 @@ export class AppController {
 
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  handleWebhook(@Body() body: any): void {
+  handleWebhook(@Body() body: any): any {
     console.log('Received webhook:', body);
     exec('git pull', (error, stdout, stderr) => {
       if (error) {
@@ -34,5 +34,7 @@ export class AppController {
       }
       console.log(`Command output: ${stdout}`);
     });
+
+    return 'hook has completed its work';
   }
 }
