@@ -13,19 +13,23 @@ app.post('/webhook', (req, res) => {
     (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing command: ${error.message}`);
-        return;
+        return res.status(500).send('Internal Server Error');
       }
+
+      // Обработка стандартного вывода
+      if (stdout) {
+        console.log(`Command output: ${stdout}`);
+      }
+
+      // Обработка стандартного вывода ошибок (если он есть)
       if (stderr) {
         console.error(`Error output: ${stderr}`);
-        return;
       }
-      console.log(`Command output: ${stdout}`);
+
+      return res.send('Hook has completed its work');
     },
   );
-
-  return res.send('Hook has completed its work');
 });
-
 const PORT = 8081;
 app.listen(PORT, () => {
   console.log(`Webhook server is running on port ${PORT}`);
