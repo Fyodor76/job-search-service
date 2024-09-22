@@ -4,11 +4,11 @@ FROM node:20-alpine
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файл package.json и package-lock.json (если есть)
-COPY package*.json ./
+# Копируем файл package.json и yarn.lock
+COPY package.json yarn.lock ./
 
-# Устанавливаем зависимости
-RUN npm install --production
+# Устанавливаем зависимости с помощью Yarn
+RUN yarn install --production
 
 # Копируем весь проект в контейнер
 COPY . .
@@ -27,10 +27,10 @@ ENV DATABASE_PASSWORD=${DATABASE_PASSWORD}
 ENV DATABASE_NAME=${DATABASE_NAME}
 
 # Сборка приложения
-RUN npm run build
+RUN yarn build
 
 # Указываем команду запуска
-CMD ["npm", "run", "start:dev"]
+CMD ["yarn", "start:dev"]
 
 # Указываем порт, на котором будет работать приложение
 EXPOSE 8080
