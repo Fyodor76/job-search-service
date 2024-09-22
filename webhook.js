@@ -10,12 +10,10 @@ app.post('/webhook', (req, res) => {
   console.log('Received webhook:', req.body);
 
   // Немедленно отправляем ответ, чтобы не ждать завершения команд
-  res
-    .status(200)
-    .send(
-      'Webhook received, processing in background',
-      JSON.stringify(req.body),
-    );
+  res.status(200).send({
+    message: 'Webhook received, processing in background',
+    data: req.body,
+  });
 
   // Выполняем команды асинхронно в фоне
   exec(
