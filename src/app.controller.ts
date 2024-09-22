@@ -21,9 +21,8 @@ export class AppController {
 
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  handleWebhook(@Body() body: any): void {
+  handleWebhook(@Body() body: any): string {
     console.log('Received webhook:', body);
-
     exec('docker restart job-search-service_app', (error, stdout, stderr) => {
       if (error) {
         console.error(`Error restarting container: ${error.message}`);
@@ -35,5 +34,6 @@ export class AppController {
       }
       console.log(`Container restarted: ${stdout}`);
     });
+    return 'Webhook received'; // Добавлено для подтверждения
   }
 }
