@@ -20,6 +20,8 @@ services:
       - DATABASE_NAME=${DATABASE_NAME}
     networks:
       - my-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   db:
     image: postgres
@@ -35,7 +37,7 @@ services:
       - postgres-data:/var/lib/postgresql/data  # Привязка volume для хранения данных
 
 networks:
-  my-network:
+  my-network: 
     driver: bridge
 
 volumes:
