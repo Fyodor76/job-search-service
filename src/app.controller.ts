@@ -21,19 +21,21 @@ export class AppController {
 
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  handleWebhook(@Body() body: any): string {
+  handleWebhook(@Body() body: any): void {
     console.log('Received webhook:', body);
-    exec('docker restart job-search-service_app_1', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error restarting container: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.error(`Error output: ${stderr}`);
-        return;
-      }
-      console.log(`Container restarted: ${stdout}`);
-    });
-    return 'Webhook received'; // Добавлено для подтверждения
+    exec(
+      'git pull origin main && docker-compose up --build -d',
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error executing command: ${error.message}`);
+          return;
+        }
+        if (stderr) {
+          console.error(`Error output: ${stderr}`);
+          return;
+        }
+        console.log(`Command output: ${stdout}`);
+      },
+    );
   }
 }
