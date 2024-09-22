@@ -1,5 +1,7 @@
-import express from 'express';
-import { exec } from 'child_process';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const express = require('express');
+const { exec } = require('child_process');
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 const app = express();
 app.use(express.json());
