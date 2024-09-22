@@ -23,19 +23,16 @@ export class AppController {
   @HttpCode(HttpStatus.OK)
   handleWebhook(@Body() body: any): void {
     console.log('Received webhook:', body);
-    exec(
-      'git pull origin main && docker-compose up --build -d',
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing command: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`Error output: ${stderr}`);
-          return;
-        }
-        console.log(`Command output: ${stdout}`);
-      },
-    );
+    exec('git pull', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`Error output: ${stderr}`);
+        return;
+      }
+      console.log(`Command output: ${stdout}`);
+    });
   }
 }
