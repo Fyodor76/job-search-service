@@ -1,16 +1,17 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import * as dotenv from 'dotenv';
+import { ConfigModule } from './config/config.module.js';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
-dotenv.config();
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
+    ConfigModule,
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
+      host: 'db',
       port: Number(process.env.DATABASE_PORT) || 5432,
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
@@ -18,6 +19,8 @@ dotenv.config();
       autoLoadModels: true,
       synchronize: true,
     }),
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
