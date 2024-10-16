@@ -4,6 +4,7 @@ import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { AppConfigService } from './app.config';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -20,8 +21,13 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
         JWT_SECRET: Joi.string().required(),
         GOOGLE_CLIENT_ID: Joi.string().required(),
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        REDIS_LOCAL_URL: Joi.string().required(),
+        REDIS_PROD_URL: Joi.string().required(),
+        NODE_ENV: Joi.string().valid('development', 'production').required(),
       }),
     }),
   ],
+  providers: [AppConfigService],
+  exports: [AppConfigService],
 })
 export class ConfigModule {}

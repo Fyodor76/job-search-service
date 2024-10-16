@@ -13,7 +13,6 @@ export class AuthService {
   ) {}
 
   async googleLogin(profile: GoogleProfile, deviceInfo: string) {
-    console.log(deviceInfo, 'deviceInfoTEEEST');
     // Ищем пользователя сначала по Google ID
     let user = await this.usersService.findByGoogleId(profile.googleId);
 

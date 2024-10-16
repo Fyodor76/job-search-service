@@ -1,11 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { Sequelize } from 'sequelize-typescript';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.APP_PORT || 8080;
+
+  const sequelize = app.get(Sequelize);
+
+  try {
+    await sequelize.authenticate();
+    console.log('Database connected successfully');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+
   await app.listen(port);
-  console.log('Test of app');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 

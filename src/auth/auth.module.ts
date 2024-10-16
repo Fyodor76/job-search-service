@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '../config/config.module';
 import { AuthController } from './auth.controller';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -10,14 +10,16 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Token } from './token.entity';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
+import { AppConfigService } from 'src/config/app.config';
 
 @Module({
   imports: [
+    ConfigModule, // Ensure this is imported
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
+      inject: [AppConfigService],
+      useFactory: (appConfigService: AppConfigService) => ({
+        secret: appConfigService.getJwtSecret(),
         signOptions: { expiresIn: '1d' },
       }),
     }),
