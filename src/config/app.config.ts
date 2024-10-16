@@ -47,7 +47,7 @@ export class AppConfigService {
       ? this.configService.get<string>('LOCAL_URL')
       : this.configService.get<string>('PROD_URL');
 
-    return `${baseUrl}/google/callback`;
+    return `${baseUrl}auth/google/callback`;
   }
 
   getGoogleClientId(): string {
