@@ -25,9 +25,15 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const deviceInfo = getDeviceInfo(req); // Используем функцию из helper'а
+    const deviceInfo = getDeviceInfo(req);
     const tokens = await this.authService.login(email, password, deviceInfo);
-    return res.status(HttpStatus.OK).json(tokens);
+
+    // Устанавливаем refreshToken в cookies
+    res.setRefreshToken(tokens.refreshToken);
+
+    return res.status(HttpStatus.OK).json({
+      accessToken: tokens.accessToken,
+    });
   }
 
   // Эндпоинт для начала аутентификации с Google
@@ -46,16 +52,27 @@ export class AuthController {
       req.user as GoogleProfile,
       deviceInfo,
     );
+
+    // Устанавливаем refreshToken в cookies
+    res.setRefreshToken(tokens.refreshToken);
+
+    // Перенаправление на сайт после успешного входа
     res.redirect(`https://www.job-search-service.ru`);
   }
 
   // Эндпоинт для обновления токена
   @Post('refresh-token')
-  async refreshToken(
-    @Body('refreshToken') refreshToken: string,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    // Получаем refreshToken из куки
+    const refreshToken = req.refreshToken;
+
+    // Проверяем, если refreshToken отсутствует
+    if (!refreshToken) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        message: 'Refresh token not provided.',
+      });
+    }
+
     // Получаем информацию об устройстве
     const userAgent = req.headers['user-agent']; // User-Agent браузера
     const ip = req.ip; // IP-адрес клиента
@@ -65,6 +82,9 @@ export class AuthController {
       refreshToken,
       userAgent || ip,
     );
+
+    // Устанавливаем новый refreshToken в cookies
+    res.setRefreshToken(tokens.refreshToken);
 
     return res.json(tokens); // Возвращаем новые токены клиенту
   }

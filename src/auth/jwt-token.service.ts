@@ -18,7 +18,7 @@ export class JwtTokenService {
       }),
       refreshToken: this.jwtService.sign(payload, {
         secret: this.appConfigService.getJwtRefreshSecret(), // Используйте метод из AppConfigService
-        expiresIn: '7d',
+        expiresIn: '60d',
       }),
     };
   }

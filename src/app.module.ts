@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize';
 import { ConfigModule } from './config/config.module';
 import { AppController } from './app.controller';
@@ -11,6 +11,7 @@ import {
   RedisSingleOptions,
 } from '@nestjs-modules/ioredis';
 import { AppConfigService } from './config/app.config';
+import { TokenMiddleware } from './middleware/token.middleware';
 
 @Module({
   imports: [
@@ -55,4 +56,8 @@ import { AppConfigService } from './config/app.config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TokenMiddleware).forRoutes('*');
+  }
+}

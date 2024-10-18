@@ -9,7 +9,7 @@ export class AuthService {
   constructor(
     private readonly jwtTokenService: JwtTokenService,
     private readonly usersService: UsersService,
-    private readonly tokensService: TokensService,
+    private readonly tokensService: TokensService, // TokensService теперь работает с Redis
   ) {}
 
   async googleLogin(profile: GoogleProfile, deviceInfo: string) {
@@ -29,68 +29,65 @@ export class AuthService {
       }
     }
 
-    // Генерация токенов
+    // Генерация access и refresh токенов
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
       username: user.email,
     });
 
-    // Проверяем наличие токена с тем же deviceInfo
-    const existingToken = await this.tokensService.findByUserIdAndDeviceInfo(
+    await this.tokensService.saveRefreshToken(
       user.id,
+      tokens.refreshToken,
       deviceInfo,
     );
 
-    if (existingToken) {
-      // Если токен с таким deviceInfo уже существует, обновляем его
-      await this.tokensService.updateRefreshToken(existingToken, {
-        refreshToken: tokens.refreshToken,
-      });
-    } else {
-      // Если такого токена нет, создаем новый
-      await this.tokensService.saveRefreshToken(
-        user.id,
-        tokens.refreshToken,
-        deviceInfo,
-      );
-    }
-
-    return { accessToken: tokens.accessToken, userId: user.id };
+    // Возвращаем access токен и ID пользователя
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+    };
   }
 
   async refreshToken(refreshToken: string, deviceInfo: string) {
+    // Ищем refresh токен в Redis
     const tokenEntry =
       await this.tokensService.findByRefreshToken(refreshToken);
     if (!tokenEntry) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
 
+    // Проверяем валидность токена
     const payload = this.jwtTokenService.validateToken(refreshToken, 'refresh');
     if (!payload) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
 
+    // Ищем пользователя по ID из payload
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
     }
 
+    // Генерируем новые access и refresh токены
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
       username: user.email,
     });
 
-    // Обновление refresh-токена в базе для конкретного устройства
+    // Обновляем refresh токен в Redis для данного пользователя и устройства
     await this.tokensService.saveRefreshToken(
       user.id,
-      tokens.refreshToken,
-      deviceInfo, // Обновляем информацию об устройстве
+      deviceInfo,
+      tokens.refreshToken, // Обновляем с новым refresh токеном
     );
 
+    // Возвращаем новые токены
     return tokens;
   }
 
   async login(email: string, password: string, deviceInfo: string) {
+    // Ищем пользователя по email
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
@@ -105,19 +102,24 @@ export class AuthService {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
-    // Генерация токенов
+    // Генерация access и refresh токенов
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
       username: user.email,
     });
 
-    // Сохраняем refresh токен и информацию об устройстве
+    // Сохраняем refresh токен и информацию об устройстве в Redis
     await this.tokensService.saveRefreshToken(
       user.id,
       tokens.refreshToken,
       deviceInfo,
     );
 
-    return { accessToken: tokens.accessToken, userId: user.id };
+    // Возвращаем access токен и ID пользователя
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+    };
   }
 }

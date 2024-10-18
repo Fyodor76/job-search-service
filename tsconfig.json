@@ -17,5 +17,9 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": [
+    "src/**/*.ts", // Убедитесь, что этот путь включает ваши файлы
+    "src/types/**/*.d.ts" // Убедитесь, что путь к вашим типам включен
+  ]
 }

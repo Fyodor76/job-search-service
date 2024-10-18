@@ -21,8 +21,9 @@ export class AppConfigService {
   }
 
   get databaseHost(): string {
+    // todo
     return this.isDevelopment
-      ? 'localhost'
+      ? 'db'
       : this.configService.get<string>('DATABASE_HOST');
   }
 
@@ -46,8 +47,8 @@ export class AppConfigService {
     const baseUrl = this.isDevelopment
       ? this.configService.get<string>('LOCAL_URL')
       : this.configService.get<string>('PROD_URL');
-
-    return `${baseUrl}auth/google/callback`;
+    console.log(baseUrl, 'baseUrl');
+    return `${baseUrl}/auth/google/callback`;
   }
 
   getGoogleClientId(): string {
