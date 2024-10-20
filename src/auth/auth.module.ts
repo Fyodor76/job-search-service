@@ -11,10 +11,11 @@ import { Token } from './token.entity';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { AppConfigService } from 'src/config/app.config';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
-    ConfigModule, // Ensure this is imported
+    ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [AppConfigService],
@@ -24,6 +25,7 @@ import { AppConfigService } from 'src/config/app.config';
       }),
     }),
     SequelizeModule.forFeature([Token]),
+    RedisModule,
     UsersModule,
   ],
   controllers: [AuthController],

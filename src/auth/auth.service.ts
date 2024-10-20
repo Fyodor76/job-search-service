@@ -96,7 +96,7 @@ export class AuthService {
     // Проверка пароля
     const isPasswordValid = await this.usersService.validatePassword(
       password,
-      user.password,
+      user.password || '',
     );
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);

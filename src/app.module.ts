@@ -36,20 +36,7 @@ import { TokenMiddleware } from './middleware/token.middleware';
         return sequelizeOptions;
       },
     }),
-    RedisModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [AppConfigService],
-      useFactory: async (
-        appConfigService: AppConfigService,
-      ): Promise<RedisModuleOptions> => {
-        const redisOptions: RedisSingleOptions = {
-          type: 'single' as const,
-          url: appConfigService.redisUrl,
-        };
-
-        return redisOptions;
-      },
-    }),
+    RedisModule,
     AuthModule,
     UsersModule,
   ],

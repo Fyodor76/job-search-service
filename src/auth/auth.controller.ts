@@ -27,13 +27,6 @@ export class AuthController {
   ) {
     const deviceInfo = getDeviceInfo(req);
     const tokens = await this.authService.login(email, password, deviceInfo);
-
-    // Устанавливаем refreshToken в cookies
-    res.setRefreshToken(tokens.refreshToken);
-
-    return res.status(HttpStatus.OK).json({
-      accessToken: tokens.accessToken,
-    });
   }
 
   // Эндпоинт для начала аутентификации с Google
