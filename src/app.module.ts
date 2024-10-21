@@ -5,13 +5,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import {
-  RedisModule,
-  RedisModuleOptions,
-  RedisSingleOptions,
-} from '@nestjs-modules/ioredis';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { AppConfigService } from './config/app.config';
 import { TokenMiddleware } from './middleware/token.middleware';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -39,6 +36,7 @@ import { TokenMiddleware } from './middleware/token.middleware';
     RedisModule,
     AuthModule,
     UsersModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

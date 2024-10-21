@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './user.entity'; // Импортируйте модель User
-import * as bcrypt from 'bcryptjs';
 import { GoogleProfile } from 'src/types/profile';
 
 @Injectable()
@@ -12,26 +11,14 @@ export class UsersService {
   ) {}
 
   // Создание нового пользователя с хешированием пароля
-  async create(email: string, password: string): Promise<User> {
-    const hashedPassword = await bcrypt.hash(password, 10); // Хешируем пароль
-    const user = await this.userModel.create({
-      email,
-      password: hashedPassword,
-    });
+  async create(email: string): Promise<User> {
+    const user = await this.userModel.create({ email });
     return user;
   }
 
   async update(user: User, updateData: Partial<User>): Promise<User> {
     Object.assign(user, updateData); // Обновляем данные пользователя
     return await user.save(); // Сохраняем изменения
-  }
-
-  // Проверка пароля
-  async validatePassword(
-    password: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return await bcrypt.compare(password, hashedPassword); // Сравниваем пароли
   }
 
   // Поиск пользователя по email
