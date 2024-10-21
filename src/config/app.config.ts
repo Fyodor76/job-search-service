@@ -66,4 +66,12 @@ export class AppConfigService {
   getJwtRefreshSecret(): string {
     return this.configService.get<string>('JWT_SECRET_REFRESH');
   }
+
+  getSmtpUser(): string {
+    return this.configService.get<string>('SMTP_USER');
+  }
+
+  getSmtpPass(): string {
+    return this.configService.get<string>('SMTP_PASS');
+  }
 }
