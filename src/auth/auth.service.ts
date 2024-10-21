@@ -21,16 +21,48 @@ export class AuthService {
     return otp; // Возвращаем OTP для отправки по почте
   }
 
-  async verifyOtp(email: string, otp: string): Promise<boolean> {
+  async verifyOtp(
+    email: string,
+    otp: string,
+    deviceInfo: any,
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string | number;
+  }> {
     const savedOtp = await this.redisService.get(`otp:${email}`); // Получаем OTP из Redis
 
     if (savedOtp !== otp) {
       throw new HttpException('Invalid OTP', HttpStatus.UNAUTHORIZED);
     }
 
-    // Если OTP верен, сохраняем пользователя в базу данных
-    const user = await this.usersService.create(email);
-    return user; // Возвращаем созданного пользователя
+    // Проверяем, существует ли пользователь
+    let user = await this.usersService.findByEmail(email);
+
+    // Если пользователь не существует, создаем нового
+    if (!user) {
+      user = await this.usersService.create(email);
+    }
+
+    // Генерируем токены
+    const tokens = this.jwtTokenService.generateTokens({
+      sub: user.id,
+      username: user.email,
+    });
+
+    // Сохраняем refresh токен
+    await this.tokensService.saveRefreshToken(
+      user.id,
+      tokens.refreshToken,
+      deviceInfo,
+    );
+
+    // Возвращаем access токен и ID пользователя
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+    };
   }
 
   async googleLogin(profile: GoogleProfile, deviceInfo: string) {
@@ -61,6 +93,8 @@ export class AuthService {
       tokens.refreshToken,
       deviceInfo,
     );
+
+    // todo проверить как работает без отправки refresh token
 
     // Возвращаем access токен и ID пользователя
     return {

@@ -36,10 +36,12 @@ export class AuthController {
   async verifyOtp(
     @Body('email') email: string,
     @Body('otp') otp: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     try {
-      const user = await this.authService.verifyOtp(email, otp); // Верификация OTP
+      const deviceInfo = getDeviceInfo(req);
+      const user = await this.authService.verifyOtp(email, otp, deviceInfo); // Верификация OTP
       return res
         .status(HttpStatus.CREATED)
         .json({ message: 'User created', user });
