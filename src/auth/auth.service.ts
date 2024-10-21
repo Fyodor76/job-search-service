@@ -3,14 +3,35 @@ import { JwtTokenService } from './jwt-token.service';
 import { UsersService } from '../users/users.service';
 import { TokensService } from './tokens.service';
 import { GoogleProfile } from 'src/types/profile';
+import { generateOtp } from 'src/helpers/generate-otp';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtTokenService: JwtTokenService,
     private readonly usersService: UsersService,
-    private readonly tokensService: TokensService, // TokensService теперь работает с Redis
+    private readonly tokensService: TokensService,
+    private readonly redisService: RedisService, // Добавьте RedisService
   ) {}
+
+  async sendOtp(email: string): Promise<string> {
+    const otp = generateOtp(); // Генерация OTP
+    await this.redisService.set(`otp:${email}`, otp, 60 * 10); // Сохранение OTP в Redis
+    return otp; // Возвращаем OTP для отправки по почте
+  }
+
+  async verifyOtp(email: string, otp: string): Promise<boolean> {
+    const savedOtp = await this.redisService.get(`otp:${email}`); // Получаем OTP из Redis
+
+    if (savedOtp !== otp) {
+      throw new HttpException('Invalid OTP', HttpStatus.UNAUTHORIZED);
+    }
+
+    // Если OTP верен, сохраняем пользователя в базу данных
+    const user = await this.usersService.create(email);
+    return user; // Возвращаем созданного пользователя
+  }
 
   async googleLogin(profile: GoogleProfile, deviceInfo: string) {
     // Ищем пользователя сначала по Google ID
@@ -84,42 +105,5 @@ export class AuthService {
 
     // Возвращаем новые токены
     return tokens;
-  }
-
-  async login(email: string, password: string, deviceInfo: string) {
-    // Ищем пользователя по email
-    const user = await this.usersService.findByEmail(email);
-    if (!user) {
-      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-    }
-
-    // Проверка пароля
-    const isPasswordValid = await this.usersService.validatePassword(
-      password,
-      user.password || '',
-    );
-    if (!isPasswordValid) {
-      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-    }
-
-    // Генерация access и refresh токенов
-    const tokens = this.jwtTokenService.generateTokens({
-      sub: user.id,
-      username: user.email,
-    });
-
-    // Сохраняем refresh токен и информацию об устройстве в Redis
-    await this.tokensService.saveRefreshToken(
-      user.id,
-      tokens.refreshToken,
-      deviceInfo,
-    );
-
-    // Возвращаем access токен и ID пользователя
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      userId: user.id,
-    };
   }
 }

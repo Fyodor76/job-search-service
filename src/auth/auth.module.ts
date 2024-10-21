@@ -12,6 +12,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { AppConfigService } from 'src/config/app.config';
 import { RedisModule } from 'src/redis/redis.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { RedisModule } from 'src/redis/redis.module';
     SequelizeModule.forFeature([Token]),
     RedisModule,
     UsersModule,
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [

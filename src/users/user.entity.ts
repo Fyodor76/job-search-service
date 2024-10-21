@@ -20,11 +20,5 @@ export class User extends Model<User> {
     type: DataType.STRING,
     allowNull: true,
   })
-  password: string; // Пароль пользователя
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
   googleId: string; // Google ID (если пользователь аутентифицирован через Google)
 }

@@ -13,20 +13,39 @@ import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { getDeviceInfo } from 'src/helpers/device-info.helper';
 import { GoogleProfile } from 'src/types/profile';
+import { MailService } from 'src/mail/mail.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailService: MailService,
+  ) {}
 
-  @Post('login')
-  async login(
+  @Post('send-otp')
+  async sendOtp(@Body('email') email: string, @Res() res: Response) {
+    const otp = await this.authService.sendOtp(email);
+    await this.mailService.sendOtp(email, otp);
+
+    return res
+      .status(HttpStatus.OK)
+      .json({ message: 'OTP sent to your email' });
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(
     @Body('email') email: string,
-    @Body('password') password: string,
-    @Req() req: Request,
+    @Body('otp') otp: string,
     @Res() res: Response,
   ) {
-    const deviceInfo = getDeviceInfo(req);
-    const tokens = await this.authService.login(email, password, deviceInfo);
+    try {
+      const user = await this.authService.verifyOtp(email, otp); // Верификация OTP
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ message: 'User created', user });
+    } catch (error) {
+      return res.status(error.getStatus()).json({ message: error.message });
+    }
   }
 
   // Эндпоинт для начала аутентификации с Google
