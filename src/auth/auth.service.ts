@@ -5,6 +5,7 @@ import { TokensService } from './tokens.service';
 import { GoogleProfile } from 'src/types/profile';
 import { generateOtp } from 'src/helpers/generate-otp';
 import { RedisService } from 'src/redis/redis.service';
+import { OtpVerificationException } from 'src/common/exceptions/otp-verification.exception';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
     const savedOtp = await this.redisService.get(`otp:${email}`); // Получаем OTP из Redis
 
     if (savedOtp !== otp) {
-      throw new HttpException('Invalid OTP', HttpStatus.UNAUTHORIZED);
+      throw new OtpVerificationException();
     }
 
     // Проверяем, существует ли пользователь
