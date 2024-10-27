@@ -11,10 +11,10 @@ export class TokenMiddleware implements NestMiddleware {
     // Добавляем метод для установки refreshToken в HttpOnly cookies
     res.setRefreshToken = (refreshToken: string) => {
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: true, // Токен доступен только на сервере
-        secure: true, // Только через HTTPS
-        sameSite: 'strict', // Защита от CSRF-атак
-        maxAge: 60 * 24 * 60 * 60 * 1000, // Время жизни 7 дней
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 60 * 24 * 60 * 60 * 1000,
       });
     };
 

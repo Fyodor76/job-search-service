@@ -24,6 +24,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: any,
   ): Promise<any> {
+    console.log(profile, 'profile in google');
     const user: GoogleProfileDTO = GoogleProfileDTO.fromProfile(profile);
     done(null, user);
   }

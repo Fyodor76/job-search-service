@@ -3,8 +3,7 @@ import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class TokensService {
-  private readonly tokenExpiry = 60 * 60 * 24 * 60; // 60 дней
-
+  private readonly tokenExpiry = 60 * 60 * 24 * 60;
   constructor(private readonly redisService: RedisService) {}
 
   // Сохранение refresh токена в Redis
@@ -95,6 +94,6 @@ export class TokensService {
 
   // Хэширование deviceInfo для более коротких ключей
   private hashDeviceInfo(deviceInfo: string): string {
-    return this.redisService.hash(deviceInfo); // Используем метод хэширования из RedisService
+    return this.redisService.hash(deviceInfo);
   }
 }

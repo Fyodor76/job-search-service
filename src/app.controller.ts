@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Redis } from 'ioredis'; // Правильный импорт Redis
+import { Redis } from 'ioredis';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @InjectRedis() private readonly redisClient: Redis, // Инъекция Redis клиента
+    @InjectRedis() private readonly redisClient: Redis,
   ) {}
 
   @Get()
@@ -18,13 +18,13 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Post('save') // Эндпоинт для сохранения данных в Redis
+  @Post('save')
   @ApiExcludeEndpoint()
   async saveValue(
     @Body() body: { key: string; value: string },
   ): Promise<string> {
     const { key, value } = body;
-    await this.redisClient.set(key, value); // Сохраняем значение в Redis
+    await this.redisClient.set(key, value);
     return `Value saved: ${value}`;
   }
 }

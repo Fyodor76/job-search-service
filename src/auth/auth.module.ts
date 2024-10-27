@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import { AppConfigService } from 'src/config/app.config';
 import { RedisModule } from 'src/redis/redis.module';
 import { MailModule } from 'src/mail/mail.module';
+import { YandexStrategy } from './strategies/yandex.strategy';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MailModule } from 'src/mail/mail.module';
   controllers: [AuthController],
   providers: [
     GoogleStrategy,
+    YandexStrategy,
     JwtStrategy,
     JwtTokenService,
     TokensService,

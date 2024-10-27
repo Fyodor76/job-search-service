@@ -1,5 +1,5 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { MailService } from './mail.service'; // Импорт вашего MailService
+import { MailService } from './mail.service';
 import { MailSwaggerDocs } from 'src/swaggerApi/mail.swagger';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -14,7 +14,7 @@ export class MailController {
     @Body() body: { email: string; otp: string },
   ): Promise<{ message: string }> {
     const { email, otp } = body;
-    await this.mailService.sendOtp(email, otp); // Используем MailService для отправки письма
-    return { message: `OTP sent to ${email}` }; // Возвращаем сообщение об успешной отправке
+    await this.mailService.sendOtp(email, otp);
+    return { message: `OTP sent to ${email}` };
   }
 }

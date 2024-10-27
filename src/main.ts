@@ -9,9 +9,9 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: '*', // Разрешает доступ с любых источников
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Разрешенные методы
-    credentials: true, // Позволяет использовать куки
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
   });
 
   const port = process.env.APP_PORT || 8080;

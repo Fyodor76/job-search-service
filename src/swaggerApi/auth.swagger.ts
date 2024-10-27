@@ -43,6 +43,24 @@ export const AuthSwaggerDocs = {
     );
   },
 
+  // Добавляем документацию для Yandex
+  yandexAuth() {
+    return applyDecorators(
+      ApiOperation({ summary: 'Аутентификация через Yandex' }),
+      ApiResponse({ status: 302, description: 'Перенаправление на Yandex' }),
+    );
+  },
+
+  yandexAuthRedirect() {
+    return applyDecorators(
+      ApiOperation({ summary: 'Callback от Yandex после аутентификации' }),
+      ApiResponse({
+        status: 302,
+        description: 'Перенаправление на сайт после успешной аутентификации',
+      }),
+    );
+  },
+
   refreshToken() {
     return applyDecorators(
       ApiOperation({ summary: 'Обновление токенов' }),

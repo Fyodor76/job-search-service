@@ -47,7 +47,6 @@ export class AppConfigService {
     const baseUrl = this.isDevelopment
       ? this.configService.get<string>('LOCAL_URL')
       : this.configService.get<string>('PROD_URL');
-    console.log(baseUrl, 'baseUrl');
     return `${baseUrl}/auth/google/callback`;
   }
 
@@ -57,6 +56,21 @@ export class AppConfigService {
 
   getGoogleClientSecret(): string {
     return this.configService.get<string>('GOOGLE_CLIENT_SECRET');
+  }
+
+  getYandexCallbackUrl(): string {
+    const baseUrl = this.isDevelopment
+      ? this.configService.get<string>('LOCAL_URL')
+      : this.configService.get<string>('PROD_URL');
+    return `${baseUrl}/auth/yandex/callback`;
+  }
+
+  getYandexClientId(): string {
+    return this.configService.get<string>('YANDEX_CLIENT_ID');
+  }
+
+  getYandexClientSecret(): string {
+    return this.configService.get<string>('YANDEX_CLIENT_SECRET');
   }
 
   getJwtSecret(): string {

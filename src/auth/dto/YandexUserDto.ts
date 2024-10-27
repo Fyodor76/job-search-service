@@ -1,24 +1,25 @@
 import { IsString, IsOptional } from 'class-validator';
 
-export class GoogleProfileDTO {
+export class YandexProfileDTO {
   @IsString()
   email: string;
-
   @IsString()
-  googleId: string;
+  yandexId: string;
 
   @IsString()
   displayName: string;
+
   @IsOptional()
   @IsString()
   avatar?: string;
 
-  static fromProfile(profile: any): GoogleProfileDTO {
+  static fromProfile(profile: any): YandexProfileDTO {
     return {
       email: profile.emails[0].value,
-      googleId: profile.id,
+      yandexId: profile.id,
       displayName: profile.displayName,
-      avatar: profile.photos[0]?.value,
+      // avatar: profile?.photos[0]?.value || '', // Аватар, если он есть
+      avatar: '',
     };
   }
 }

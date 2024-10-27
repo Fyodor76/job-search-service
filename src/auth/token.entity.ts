@@ -14,30 +14,30 @@ export class Token extends Model<Token> {
     autoIncrement: true,
     primaryKey: true,
   })
-  id: number; // Идентификатор токена
+  id: number;
 
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  userId: number; // Внешний ключ на пользователя
+  userId: number;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  refreshToken: string; // Refresh-токен
+  refreshToken: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  deviceInfo: string; // Информация об устройстве (User-Agent, IP или другие данные)
+  deviceInfo: string;
 
   @Column({
     type: DataType.DATE,
     allowNull: true,
   })
-  expiresAt: Date; // Дата истечения refresh-токена (опционально)
+  expiresAt: Date;
 }

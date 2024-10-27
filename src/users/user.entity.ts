@@ -7,18 +7,24 @@ export class User extends Model<User> {
     autoIncrement: true,
     primaryKey: true,
   })
-  id: number; // Идентификатор пользователя
+  id: number;
 
   @Unique
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  email: string; // Email пользователя
+  email: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  googleId: string; // Google ID (если пользователь аутентифицирован через Google)
+  googleId: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  yandexId: string;
 }

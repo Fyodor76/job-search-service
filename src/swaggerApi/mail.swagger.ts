@@ -1,4 +1,3 @@
-// src/swaggerApi/mail.swagger.ts
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 

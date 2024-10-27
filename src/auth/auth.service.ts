@@ -1,8 +1,8 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Res } from '@nestjs/common';
 import { JwtTokenService } from './jwt-token.service';
 import { UsersService } from '../users/users.service';
 import { TokensService } from './tokens.service';
-import { GoogleProfile } from 'src/types/profile';
+import { ProfileType } from 'src/types/profile';
 import { generateOtp } from 'src/helpers/generate-otp';
 import { RedisService } from 'src/redis/redis.service';
 import { OtpVerificationException } from 'src/common/exceptions/otp-verification.exception';
@@ -66,7 +66,43 @@ export class AuthService {
     };
   }
 
-  async googleLogin(profile: GoogleProfile, deviceInfo: string) {
+  async yandexLogin(profile: ProfileType, deviceInfo: string) {
+    // Ищем пользователя по Yandex ID
+    let user = await this.usersService.findByYandexId(profile.yandexId);
+
+    if (!user) {
+      // Если пользователь не найден по Yandex ID, проверяем по email
+      user = await this.usersService.findByEmail(profile.email);
+
+      if (user) {
+        // Если пользователь найден по email, обновляем его Yandex ID
+        await this.usersService.update(user, { yandexId: profile.yandexId });
+      } else {
+        // Если пользователя нет, создаем нового
+        user = await this.usersService.createFromYandexProfile(profile);
+      }
+    }
+
+    // Генерация access и refresh токенов
+    const tokens = this.jwtTokenService.generateTokens({
+      sub: user.id,
+      username: user.email,
+    });
+
+    await this.tokensService.saveRefreshToken(
+      user.id,
+      tokens.refreshToken,
+      deviceInfo,
+    );
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+    };
+  }
+
+  async googleLogin(profile: ProfileType, deviceInfo: string) {
     // Ищем пользователя сначала по Google ID
     let user = await this.usersService.findByGoogleId(profile.googleId);
 
@@ -119,6 +155,8 @@ export class AuthService {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
 
+    console.log(payload, 'payloaaaadddd');
+
     // Ищем пользователя по ID из payload
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
@@ -134,8 +172,8 @@ export class AuthService {
     // Обновляем refresh токен в Redis для данного пользователя и устройства
     await this.tokensService.saveRefreshToken(
       user.id,
-      deviceInfo,
       tokens.refreshToken, // Обновляем с новым refresh токеном
+      deviceInfo,
     );
 
     // Возвращаем новые токены
