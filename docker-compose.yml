@@ -66,11 +66,12 @@ services:
     build:
       context: ./telegram-bot
     ports:
-      - "3000:3000"
+      - "8082:8082"
     networks:
       - my-network
     environment:
-      - REDIS_URL=${REDIS_URL}
+      - REDIS_PROD_URL=${REDIS_PROD_URL}
+      - BOT_TOKEN=${BOT_TOKEN} 
     depends_on:
       - redis
 

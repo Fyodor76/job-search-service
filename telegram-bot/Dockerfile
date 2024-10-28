@@ -13,6 +13,12 @@ RUN yarn install
 # Скопируйте остальные файлы проекта
 COPY . .
 
+ARG REDIS_PROD_URL
+ARG BOT_TOKEN
+
+ENV REDIS_PROD_URL=${REDIS_PROD_URL}
+ENV BOT_TOKEN=${BOT_TOKEN} 
+
 # Скомпилируйте TypeScript в JavaScript
 RUN yarn build
 
@@ -30,7 +36,7 @@ COPY --from=builder /app/dist ./dist
 RUN yarn install --production
 
 # Укажите порт, который будет слушать приложение
-EXPOSE 3000
+EXPOSE 8082
 
 # Запустите приложение
 CMD ["node", "dist/index.js"]

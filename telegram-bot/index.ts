@@ -4,16 +4,18 @@ import TelegramBot, {
   Message,
   InlineKeyboardMarkup,
 } from 'node-telegram-bot-api';
+import dotenv from 'dotenv';
 
+dotenv.config();
 // Конфигурация Redis
-const redis = new Redis('redis://redis:6379');
+const redis = new Redis(process.env.REDIS_PROD_URL || 'redis://localhost:6379');
 
 // Конфигурация Telegram бота
-const TELEGRAM_TOKEN = '7665924507:AAGOveA5ST7wRWAU8_h5uQbcB7UVctpXn4s';
+const TELEGRAM_TOKEN = process.env.BOT_TOKEN || '';
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
 const app = express();
-const port = 3000;
+const port = 8002;
 
 // Генерация OTP
 function generateOtp(): string {
