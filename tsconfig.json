@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": false
   },
   "include": [
-    "src/**/*.ts", // Убедитесь, что этот путь включает ваши файлы
-    "src/types/**/*.d.ts" // Убедитесь, что путь к вашим типам включен
+    "src/**/*.ts", 
+    "src/types/**/*.d.ts", 
+    "telegram-bot/**/*.ts" 
   ]
 }

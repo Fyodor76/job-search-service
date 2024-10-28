@@ -62,6 +62,18 @@ services:
     volumes:
       - redis-data:/data
 
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+    ports:
+      - "3000:3000"
+    networks:
+      - my-network
+    environment:
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - redis
+
 networks:
   my-network: 
     name: my-network

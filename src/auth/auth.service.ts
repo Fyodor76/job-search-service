@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, Res } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtTokenService } from './jwt-token.service';
 import { UsersService } from '../users/users.service';
 import { TokensService } from './tokens.service';
@@ -13,7 +13,7 @@ export class AuthService {
     private readonly jwtTokenService: JwtTokenService,
     private readonly usersService: UsersService,
     private readonly tokensService: TokensService,
-    private readonly redisService: RedisService, // Добавьте RedisService
+    private readonly redisService: RedisService,
   ) {}
 
   async sendOtp(email: string): Promise<string> {
