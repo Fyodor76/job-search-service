@@ -11,8 +11,13 @@ export class UsersService {
   ) {}
 
   // Создание нового пользователя
-  async create(email: string): Promise<User> {
+  async createByEmail(email: string): Promise<User> {
     const user = await this.userModel.create({ email });
+    return user;
+  }
+
+  async createByChatId(chatId: string): Promise<User> {
+    const user = await this.userModel.create({ chatId });
     return user;
   }
 
@@ -24,6 +29,10 @@ export class UsersService {
   // Поиск пользователя по email
   async findByEmail(email: string): Promise<User | null> {
     return await this.userModel.findOne({ where: { email } });
+  }
+
+  async findByChatId(chatId: string): Promise<User | null> {
+    return await this.userModel.findOne({ where: { chatId } });
   }
 
   async findById(id: number): Promise<User | null> {

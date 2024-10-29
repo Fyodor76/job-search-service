@@ -7,6 +7,7 @@ import {
   Body,
   UseGuards,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
@@ -40,15 +41,26 @@ export class AuthController {
   }
 
   @Post('verify-otp')
-  @AuthSwaggerDocs.verifyOtp()
+  @AuthSwaggerDocs.verifyOtpByEmailOrChatId()
   async verifyOtp(
     @Body('email') email: string,
     @Body('otp') otp: string,
+    @Query('chatId') chatId: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const deviceInfo = getDeviceInfo(req);
-    const tokens = await this.authService.verifyOtp(email, otp, deviceInfo);
+    let tokens;
+
+    if (chatId) {
+      tokens = await this.authService.verifyOtpByTelegram(
+        chatId,
+        otp,
+        deviceInfo,
+      );
+    } else {
+      tokens = await this.authService.verifyOtpByEmail(email, otp, deviceInfo);
+    }
 
     res.setRefreshToken(tokens.refreshToken);
 

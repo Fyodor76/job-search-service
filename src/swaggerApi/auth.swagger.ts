@@ -14,7 +14,7 @@ export const AuthSwaggerDocs = {
     );
   },
 
-  verifyOtp() {
+  verifyOtpByEmailOrChatId() {
     return applyDecorators(
       ApiOperation({ summary: 'Верификация OTP' }),
       ApiBody({

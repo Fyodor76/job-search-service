@@ -12,7 +12,7 @@ export class User extends Model<User> {
   @Unique
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
   email: string;
 
@@ -27,4 +27,10 @@ export class User extends Model<User> {
     allowNull: true,
   })
   yandexId: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  chatId: string;
 }

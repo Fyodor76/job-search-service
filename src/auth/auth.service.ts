@@ -22,7 +22,51 @@ export class AuthService {
     return otp; // Возвращаем OTP для отправки по почте
   }
 
-  async verifyOtp(
+  async verifyOtpByTelegram(
+    chatId: string,
+    otp: string,
+    deviceInfo: any,
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string | number;
+  }> {
+    const savedOtp = await this.redisService.get(`otp:${chatId}`); // Получаем OTP из Redis
+
+    if (savedOtp !== otp) {
+      throw new OtpVerificationException();
+    }
+
+    // Проверяем, существует ли пользователь
+    let user = await this.usersService.findByChatId(chatId);
+
+    // Если пользователь не существует, создаем нового
+    if (!user) {
+      user = await this.usersService.createByChatId(chatId);
+    }
+
+    // Генерируем токены
+    const tokens = this.jwtTokenService.generateTokens({
+      sub: user.id,
+      username: user.chatId,
+    });
+
+    // Сохраняем refresh токен
+    await this.tokensService.saveRefreshToken(
+      user.id,
+      tokens.refreshToken,
+      deviceInfo,
+    );
+
+    // Возвращаем access токен и ID пользователя
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+    };
+  }
+
+  async verifyOtpByEmail(
     email: string,
     otp: string,
     deviceInfo: any,
@@ -42,7 +86,7 @@ export class AuthService {
 
     // Если пользователь не существует, создаем нового
     if (!user) {
-      user = await this.usersService.create(email);
+      user = await this.usersService.createByEmail(email);
     }
 
     // Генерируем токены

@@ -12,6 +12,7 @@ const redis = new Redis(process.env.REDIS_PROD_URL || 'redis://localhost:6379');
 
 // Конфигурация Telegram бота
 const TELEGRAM_TOKEN = process.env.BOT_TOKEN || '';
+
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
 const app = express();
