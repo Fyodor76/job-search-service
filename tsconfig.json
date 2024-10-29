@@ -21,6 +21,7 @@
   "include": [
     "src/**/*.ts", 
     "src/types/**/*.d.ts", 
-    "telegram-bot/**/*.ts" 
+    "telegram-bot/**/*.ts",
+    "config/config.ts" 
   ]
 }
