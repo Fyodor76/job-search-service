@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
-
+import { Request, Response } from 'express';
 @Controller()
 export class AppController {
   constructor(
@@ -13,7 +13,8 @@ export class AppController {
 
   @Get()
   @ApiExcludeEndpoint()
-  getHello(): string {
+  getHello(@Req() req: Request, @Res() res: Response): string {
+    res.cookie('test', 'test');
     return this.appService.getHello();
   }
 
