@@ -1,4 +1,3 @@
-// src/swaggerApi/auth.swagger.ts
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
@@ -14,7 +13,7 @@ export const AuthSwaggerDocs = {
     );
   },
 
-  verifyOtpByEmailOrChatId() {
+  verifyOtp() {
     return applyDecorators(
       ApiOperation({ summary: 'Верификация OTP' }),
       ApiBody({

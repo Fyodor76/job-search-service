@@ -13,6 +13,8 @@ export class TokensService {
     deviceInfo: string,
   ): Promise<void> {
     const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
+    console.log(hashedDeviceInfo, 'hashed device info in saveRefreshToken');
+
     const redisKey = this.getRedisKey(userId, hashedDeviceInfo);
 
     // Найдем старый refreshToken для этого устройства
@@ -39,7 +41,9 @@ export class TokensService {
     userId: number,
     deviceInfo: string,
   ): Promise<string | null> {
-    const redisKey = this.getRedisKey(userId, deviceInfo);
+    const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
+    console.log(hashedDeviceInfo, 'hashed device info in delete token');
+    const redisKey = this.getRedisKey(userId, hashedDeviceInfo);
     return this.redisService.get(redisKey);
   }
 
@@ -59,10 +63,16 @@ export class TokensService {
     userId: number,
     deviceInfo: string,
   ): Promise<void> {
-    const redisKey = this.getRedisKey(userId, deviceInfo);
+    const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
+    console.log(hashedDeviceInfo, 'hashed device info in delete token');
+    const redisKey = this.getRedisKey(userId, hashedDeviceInfo);
+
     const refreshToken = await this.redisService.get(redisKey);
+    console.log(refreshToken, 'refreshToken in token');
+
     if (refreshToken) {
       // Удаляем также запись по refreshToken
+      console.log('delete refresh');
       await this.redisService.del(`refreshTokens:${refreshToken}`);
     }
     await this.redisService.del(redisKey);
@@ -87,8 +97,7 @@ export class TokensService {
     }
   }
   // Получение уникального ключа для хранения данных в Redis
-  private getRedisKey(userId: number, deviceInfo: string): string {
-    const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
+  private getRedisKey(userId: number, hashedDeviceInfo: string): string {
     return `tokens:${userId}:${hashedDeviceInfo}`;
   }
 

@@ -31,6 +31,16 @@ export class AppConfigService {
     return Number(this.configService.get<string>('DATABASE_PORT')) || 5432;
   }
 
+  getBaseUrl(): string {
+    return this.isDevelopment
+      ? this.configService.get<string>('NEXT_LOCAL_URL')
+      : this.configService.get<string>('NEXT_PROD_URL');
+  }
+
+  getIsDevelopment(): boolean {
+    return this.isDevelopment;
+  }
+
   getDatabaseUser(): string {
     return this.configService.get<string>('DATABASE_USER');
   }

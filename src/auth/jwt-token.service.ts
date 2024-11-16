@@ -14,7 +14,7 @@ export class JwtTokenService {
     return {
       accessToken: this.jwtService.sign(payload, {
         secret: this.appConfigService.getJwtSecret(),
-        expiresIn: '15m',
+        expiresIn: '10s',
       }),
       refreshToken: this.jwtService.sign(payload, {
         secret: this.appConfigService.getJwtRefreshSecret(),

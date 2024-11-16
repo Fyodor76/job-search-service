@@ -14,7 +14,6 @@ export class AppController {
   @Get()
   @ApiExcludeEndpoint()
   getHello(): string {
-    console.log('Test123');
     return this.appService.getHello();
   }
 

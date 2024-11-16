@@ -39,6 +39,7 @@ import { YandexStrategy } from './strategies/yandex.strategy';
     JwtTokenService,
     TokensService,
     AuthService,
+    AppConfigService,
   ],
 })
 export class AuthModule {}

@@ -22,6 +22,6 @@
     "src/**/*.ts", 
     "src/types/**/*.d.ts", 
     "telegram-bot/**/*.ts",
-    "config/config.ts" 
+    "config/config.js" 
   ]
 }

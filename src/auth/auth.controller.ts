@@ -19,6 +19,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthSwaggerDocs } from 'src/swaggerApi/auth.swagger';
 import { OtpVerificationException } from 'src/common/exceptions/otp-verification.exception';
 import { YandexProfileDTO } from './dto/YandexUserDto';
+import { AppConfigService } from 'src/config/app.config';
+import { RefreshVerificationException } from 'src/common/exceptions/refresh-verification.exception';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,12 +28,12 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly mailService: MailService,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   @Post('send-otp')
   @AuthSwaggerDocs.sendOtp()
   async sendOtp(@Body('email') email: string, @Res() res: Response) {
-    console.log(email, 'email');
     const otp = await this.authService.sendOtp(email);
     await this.mailService.sendOtp(email, otp);
 
@@ -41,7 +43,7 @@ export class AuthController {
   }
 
   @Post('verify-otp')
-  @AuthSwaggerDocs.verifyOtpByEmailOrChatId()
+  @AuthSwaggerDocs.verifyOtp()
   async verifyOtp(
     @Body('email') email: string,
     @Body('otp') otp: string,
@@ -63,6 +65,7 @@ export class AuthController {
     }
 
     res.setRefreshToken(tokens.refreshToken);
+    res.setAccessToken(tokens.accessToken);
 
     return res
       .status(HttpStatus.CREATED)
@@ -84,7 +87,11 @@ export class AuthController {
       deviceInfo,
     );
     res.setRefreshToken(tokens.refreshToken);
-    res.redirect(`https://www.job-search-service.ru`);
+    res.setAccessToken(tokens.accessToken);
+    setImmediate(() => {
+      const urlRedirect = this.appConfigService.getBaseUrl();
+      res.redirect(urlRedirect);
+    });
   }
 
   @Get('google')
@@ -93,7 +100,6 @@ export class AuthController {
   googleAuth() {}
 
   @Get('google/callback')
-  @AuthSwaggerDocs.googleAuthRedirect()
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const deviceInfo = getDeviceInfo(req);
@@ -102,25 +108,52 @@ export class AuthController {
       deviceInfo,
     );
     res.setRefreshToken(tokens.refreshToken);
-    res.redirect(`https://www.job-search-service.ru`);
+    res.setAccessToken(tokens.accessToken);
+    setImmediate(() => {
+      const urlRedirect = this.appConfigService.getBaseUrl();
+      res.redirect(urlRedirect);
+    });
   }
 
   @Post('refresh-token')
   @AuthSwaggerDocs.refreshToken()
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.refreshToken;
-
     if (!refreshToken) {
-      throw new OtpVerificationException();
+      throw new RefreshVerificationException();
     }
+    const deviceInfo = getDeviceInfo(req);
 
-    const userAgent = req.headers['user-agent'];
     const ip = req.ip;
     const tokens = await this.authService.refreshToken(
       refreshToken,
-      userAgent || ip,
+      deviceInfo || ip,
     );
     res.setRefreshToken(tokens.refreshToken);
-    return res.json(tokens);
+    res.setAccessToken(tokens.accessToken);
+    return res.status(HttpStatus.OK).json(tokens);
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  async logout(@Req() req: any, @Res() res: Response) {
+    const userId = req.user.userId;
+    const deviceInfo = getDeviceInfo(req);
+
+    await this.authService.logout(userId, deviceInfo);
+
+    const isProduction = !this.appConfigService.getIsDevelopment();
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+    });
+
+    return res.status(HttpStatus.OK).json({ message: 'logout succesfully' });
   }
 }

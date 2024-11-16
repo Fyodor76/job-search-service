@@ -18,6 +18,8 @@ services:
         GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
         REDIS_LOCAL_URL: ${REDIS_LOCAL_URL}
         REDIS_PROD_URL: ${REDIS_PROD_URL}
+        NEXT_PROD_URL: ${NEXT_PROD_URL}
+        LOCAL_PROD_URL: ${LOCAL_PROD_URL}
     ports:
       - "${APP_PORT}:8080"
     environment:
@@ -34,6 +36,8 @@ services:
       - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
       - REDIS_LOCAL_URL=${REDIS_LOCAL_URL}
       - REDIS_PROD_URL=${REDIS_PROD_URL}
+      - NEXT_PROD_URL=${NEXT_PROD_URL}
+      - NEXT_LOCAL_URL=${NEXT_LOCAL_URL}
     networks:
       - my-network
     volumes:
@@ -72,6 +76,7 @@ services:
     environment:
       - REDIS_PROD_URL=${REDIS_PROD_URL}
       - BOT_TOKEN=${BOT_TOKEN} 
+      - BOT_TOKEN_TEST=${BOT_TOKEN_TEST} 
     depends_on:
       - redis
 

@@ -31,16 +31,14 @@ export class AuthService {
     refreshToken: string;
     userId: string | number;
   }> {
-    const savedOtp = await this.redisService.get(`otp:${chatId}`); // Получаем OTP из Redis
+    const savedOtp = await this.redisService.get(`otp:${chatId}`);
 
     if (savedOtp !== otp) {
       throw new OtpVerificationException();
     }
 
-    // Проверяем, существует ли пользователь
     let user = await this.usersService.findByChatId(chatId);
 
-    // Если пользователь не существует, создаем нового
     if (!user) {
       user = await this.usersService.createByChatId(chatId);
     }
@@ -48,17 +46,15 @@ export class AuthService {
     // Генерируем токены
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
-      username: user.chatId,
+      chatId: user.chatId,
     });
 
-    // Сохраняем refresh токен
     await this.tokensService.saveRefreshToken(
       user.id,
       tokens.refreshToken,
       deviceInfo,
     );
 
-    // Возвращаем access токен и ID пользователя
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -92,7 +88,7 @@ export class AuthService {
     // Генерируем токены
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
-      username: user.email,
+      email: user.email,
     });
 
     // Сохраняем refresh токен
@@ -130,7 +126,7 @@ export class AuthService {
     // Генерация access и refresh токенов
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
-      username: user.email,
+      email: user.email,
     });
 
     await this.tokensService.saveRefreshToken(
@@ -166,7 +162,7 @@ export class AuthService {
     // Генерация access и refresh токенов
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
-      username: user.email,
+      email: user.email,
     });
 
     await this.tokensService.saveRefreshToken(
@@ -174,8 +170,6 @@ export class AuthService {
       tokens.refreshToken,
       deviceInfo,
     );
-
-    // todo проверить как работает без отправки refresh token
 
     // Возвращаем access токен и ID пользователя
     return {
@@ -186,7 +180,6 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string, deviceInfo: string) {
-    // Ищем refresh токен в Redis
     const tokenEntry =
       await this.tokensService.findByRefreshToken(refreshToken);
     if (!tokenEntry) {
@@ -199,8 +192,6 @@ export class AuthService {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
 
-    console.log(payload, 'payloaaaadddd');
-
     // Ищем пользователя по ID из payload
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
@@ -210,7 +201,7 @@ export class AuthService {
     // Генерируем новые access и refresh токены
     const tokens = this.jwtTokenService.generateTokens({
       sub: user.id,
-      username: user.email,
+      email: user.email,
     });
 
     // Обновляем refresh токен в Redis для данного пользователя и устройства
@@ -222,5 +213,9 @@ export class AuthService {
 
     // Возвращаем новые токены
     return tokens;
+  }
+
+  async logout(userId: number, deviceInfo: string): Promise<void> {
+    await this.tokensService.deleteTokensByUserIdAndDevice(userId, deviceInfo);
   }
 }

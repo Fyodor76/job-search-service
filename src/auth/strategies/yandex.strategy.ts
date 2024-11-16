@@ -22,7 +22,6 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex') {
     done: any,
   ): Promise<any> {
     const user: YandexProfileDTO = YandexProfileDTO.fromProfile(profile);
-    console.log(user, 'user un yandex strategy');
     done(null, user);
   }
 }
