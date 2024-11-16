@@ -107,6 +107,7 @@ export class AuthController {
       req.user as ProfileType,
       deviceInfo,
     );
+    console.log(tokens, 'tokens');
     res.setRefreshToken(tokens.refreshToken);
     res.setAccessToken(tokens.accessToken);
     setImmediate(() => {
