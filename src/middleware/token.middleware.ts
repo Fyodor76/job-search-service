@@ -20,8 +20,10 @@ export class TokenMiddleware implements NestMiddleware {
 
     res.setRefreshToken = (refreshToken: string) => {
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: isProduction,
+        // httpOnly: true,
+        // secure: isProduction,
+        httpOnly: false,
+        secure: false,
         sameSite: 'none',
         maxAge: 60 * 24 * 60 * 60 * 1000,
       });
@@ -29,8 +31,8 @@ export class TokenMiddleware implements NestMiddleware {
 
     res.setAccessToken = (accessToken: string) => {
       res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: isProduction,
+        httpOnly: false,
+        secure: false,
         sameSite: 'none',
         maxAge: 15 * 60 * 1000,
       });
