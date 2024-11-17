@@ -5,17 +5,18 @@ import TelegramBot, {
   InlineKeyboardMarkup,
 } from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 // Конфигурация Redis
 const redis = new Redis(process.env.REDIS_PROD_URL || 'redis://localhost:6379');
 
 // Конфигурация Telegram бота
-const TELEGRAM_TOKEN = Boolean(process.env.NODE_ENV)
-  ? process.env.BOT_TOKEN
-  : process.env.BOT_TOKEN_TEST;
-
-console.log(TELEGRAM_TOKEN, 'telegram token');
+const TELEGRAM_TOKEN =
+  process.env.NODE_ENV === 'production'
+    ? process.env.BOT_TOKEN
+    : process.env.BOT_TOKEN_TEST;
 
 const bot = new TelegramBot(TELEGRAM_TOKEN || '', { polling: true });
 

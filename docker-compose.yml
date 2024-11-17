@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     build:
-      context: .  
+      context: .
       args:
         NODE_ENV: ${NODE_ENV}
         DATABASE_HOST: ${DATABASE_HOST}
@@ -21,7 +21,7 @@ services:
         NEXT_PROD_URL: ${NEXT_PROD_URL}
         LOCAL_PROD_URL: ${LOCAL_PROD_URL}
     ports:
-      - "${APP_PORT}:8080"
+      - '${APP_PORT}:8080'
     environment:
       - NODE_ENV=${NODE_ENV}
       - DATABASE_HOST=${DATABASE_HOST}
@@ -51,7 +51,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - my-network
     volumes:
@@ -60,7 +60,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - my-network
     volumes:
@@ -70,18 +70,19 @@ services:
     build:
       context: ./telegram-bot
     ports:
-      - "8082:8082"
+      - '8082:8082'
     networks:
       - my-network
     environment:
+      - NODE_ENV=${NODE_ENV}
       - REDIS_PROD_URL=${REDIS_PROD_URL}
-      - BOT_TOKEN=${BOT_TOKEN} 
-      - BOT_TOKEN_TEST=${BOT_TOKEN_TEST} 
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BOT_TOKEN_TEST=${BOT_TOKEN_TEST}
     depends_on:
       - redis
 
 networks:
-  my-network: 
+  my-network:
     name: my-network
     driver: bridge
 
