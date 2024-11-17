@@ -12,6 +12,12 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'https://www.job-search-service.ru'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+    ],
   });
 
   const port = process.env.APP_PORT || 8080;
