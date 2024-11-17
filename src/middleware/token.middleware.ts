@@ -15,14 +15,11 @@ export class TokenMiddleware implements NestMiddleware {
 
     const isProduction = !this.appConfigService.getIsDevelopment();
 
-    console.log(isProduction, 'isProcuction in middleware');
-    console.log(refreshToken, 'isProcuction in middleware refreshToken');
-
     res.setRefreshToken = (refreshToken: string) => {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'none',
+        sameSite: 'lax',
         maxAge: 60 * 24 * 60 * 60 * 1000,
       });
     };
@@ -31,7 +28,7 @@ export class TokenMiddleware implements NestMiddleware {
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'none',
+        sameSite: 'lax',
         maxAge: 15 * 60 * 1000,
       });
     };
