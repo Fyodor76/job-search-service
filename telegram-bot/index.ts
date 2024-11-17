@@ -11,10 +11,13 @@ dotenv.config();
 const redis = new Redis(process.env.REDIS_PROD_URL || 'redis://localhost:6379');
 
 // Конфигурация Telegram бота
-// const TELEGRAM_TOKEN = process.env.BOT_TOKEN || '';
-const TELEGRAM_TOKEN = '7916947995:AAG-jrX-fmrh9yoi4P0etRS29exqNETYZu4';
+const TELEGRAM_TOKEN = Boolean(process.env.NODE_ENV)
+  ? process.env.BOT_TOKEN
+  : process.env.BOT_TOKEN_TEST;
 
-const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+console.log(TELEGRAM_TOKEN, 'telegram token');
+
+const bot = new TelegramBot(TELEGRAM_TOKEN || '', { polling: true });
 
 const app = express();
 const port = 8002;

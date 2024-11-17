@@ -32,8 +32,8 @@ export class AppController {
   async test(@Req() req: any, @Res() res: Response) {
     console.log('123');
     res.cookie('test', 'test', {
-      httpOnly: false, // Защищает от XSS
-      secure: false, // Только через HTTPS в продакшн
+      httpOnly: true, // Защищает от XSS
+      secure: true, // Только через HTTPS в продакшн
     });
     return res.status(HttpStatus.OK).json({ test: 'test123' });
   }
