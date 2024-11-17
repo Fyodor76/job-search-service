@@ -13,8 +13,6 @@ export class TokensService {
     deviceInfo: string,
   ): Promise<void> {
     const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
-    console.log(hashedDeviceInfo, 'hashed device info in saveRefreshToken');
-
     const redisKey = this.getRedisKey(userId, hashedDeviceInfo);
 
     // Найдем старый refreshToken для этого устройства
@@ -42,7 +40,6 @@ export class TokensService {
     deviceInfo: string,
   ): Promise<string | null> {
     const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
-    console.log(hashedDeviceInfo, 'hashed device info in delete token');
     const redisKey = this.getRedisKey(userId, hashedDeviceInfo);
     return this.redisService.get(redisKey);
   }
@@ -64,15 +61,12 @@ export class TokensService {
     deviceInfo: string,
   ): Promise<void> {
     const hashedDeviceInfo = this.hashDeviceInfo(deviceInfo);
-    console.log(hashedDeviceInfo, 'hashed device info in delete token');
     const redisKey = this.getRedisKey(userId, hashedDeviceInfo);
 
     const refreshToken = await this.redisService.get(redisKey);
-    console.log(refreshToken, 'refreshToken in token');
 
     if (refreshToken) {
       // Удаляем также запись по refreshToken
-      console.log('delete refresh');
       await this.redisService.del(`refreshTokens:${refreshToken}`);
     }
     await this.redisService.del(redisKey);

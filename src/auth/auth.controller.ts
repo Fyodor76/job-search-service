@@ -17,7 +17,6 @@ import { ProfileType } from 'src/types/profile';
 import { MailService } from 'src/mail/mail.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthSwaggerDocs } from 'src/swaggerApi/auth.swagger';
-import { OtpVerificationException } from 'src/common/exceptions/otp-verification.exception';
 import { YandexProfileDTO } from './dto/YandexUserDto';
 import { AppConfigService } from 'src/config/app.config';
 import { RefreshVerificationException } from 'src/common/exceptions/refresh-verification.exception';
