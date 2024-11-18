@@ -129,7 +129,7 @@ export class AuthController {
     setTimeout(() => {
       const urlRedirect = this.appConfigService.getBaseUrl();
       res.redirect(urlRedirect);
-    }, 3000);
+    }, 7000);
   }
 
   @Post('refresh-token')
