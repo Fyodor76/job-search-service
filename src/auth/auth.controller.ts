@@ -107,8 +107,23 @@ export class AuthController {
       deviceInfo,
     );
     console.log(tokens, 'tokens');
-    res.setRefreshToken(tokens.refreshToken);
-    res.setAccessToken(tokens.accessToken);
+    // res.setRefreshToken(tokens.refreshToken);
+    // res.setAccessToken(tokens.accessToken);
+
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 60 * 24 * 60 * 60 * 1000,
+    });
+
+    res.cookie('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+
     setImmediate(() => {
       const urlRedirect = this.appConfigService.getBaseUrl();
       res.redirect(urlRedirect);
