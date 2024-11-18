@@ -145,20 +145,20 @@ export class AuthController {
 
     await this.authService.logout(userId, deviceInfo);
 
-    const isProduction = !this.appConfigService.getIsDevelopment();
+    const isDevelopment = this.appConfigService.getIsDevelopment();
 
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'lax' : 'none',
-      domain: isProduction ? '.job-search-service.ru' : 'localhost',
+      secure: !isDevelopment,
+      sameSite: 'lax',
+      domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
     });
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'lax' : 'none',
-      domain: isProduction ? '.job-search-service.ru' : 'localhost',
+      secure: !isDevelopment,
+      sameSite: 'lax',
+      domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
     });
 
     return res.status(HttpStatus.OK).json({ message: 'Logout successfully' });

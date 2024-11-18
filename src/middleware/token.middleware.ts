@@ -13,14 +13,14 @@ export class TokenMiddleware implements NestMiddleware {
     req.refreshToken = refreshToken || null;
     req.accessToken = accessToken || null;
 
-    const isProduction = !this.appConfigService.getIsDevelopment();
+    const isDevelopment = this.appConfigService.getIsDevelopment();
 
     res.setRefreshToken = (refreshToken: string) => {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'lax' : 'none',
-        domain: isProduction ? '.job-search-service.ru' : 'localhost',
+        secure: !isDevelopment,
+        sameSite: 'lax',
+        domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
         maxAge: 60 * 24 * 60 * 60 * 1000,
       });
     };
@@ -28,9 +28,9 @@ export class TokenMiddleware implements NestMiddleware {
     res.setAccessToken = (accessToken: string) => {
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'lax' : 'none',
-        domain: isProduction ? '.job-search-service.ru' : 'localhost',
+        secure: !isDevelopment,
+        sameSite: 'lax',
+        domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
         maxAge: 15 * 60 * 1000,
       });
     };
