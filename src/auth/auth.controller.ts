@@ -122,7 +122,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
-      domain: '.job-search-service.ru',v
+      domain: '.job-search-service.ru',
       maxAge: 15 * 60 * 1000,
     });
 
