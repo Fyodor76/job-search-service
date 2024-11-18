@@ -182,7 +182,8 @@ export class AuthService {
   async refreshToken(refreshToken: string, deviceInfo: string) {
     const tokenEntry =
       await this.tokensService.findByRefreshToken(refreshToken);
-    if (!tokenEntry) {
+
+    if (tokenEntry !== null && !tokenEntry) {
       throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
     }
 

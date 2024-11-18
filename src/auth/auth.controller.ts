@@ -119,24 +119,41 @@ export class AuthController {
   @Post('refresh-token')
   @AuthSwaggerDocs.refreshToken()
   async refreshToken(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.refreshToken;
-    if (!refreshToken) {
-      throw new RefreshVerificationException();
+    try {
+      const refreshToken = req.refreshToken;
+
+      if (!refreshToken) {
+        throw new RefreshVerificationException(); // Исключение, если токена нет
+      }
+
+      const deviceInfo = getDeviceInfo(req);
+      const ip = req.ip;
+
+      // Получаем новые токены
+      const tokens = await this.authService.refreshToken(
+        refreshToken,
+        deviceInfo || ip,
+      );
+
+      // Устанавливаем новые куки
+      res.setRefreshToken(tokens.refreshToken);
+      res.setAccessToken(tokens.accessToken);
+
+      // Возвращаем успешный ответ с токенами
+      return res.status(HttpStatus.OK).json(tokens);
+    } catch (error) {
+      console.error('Ошибка при обновлении токенов:', error);
+
+      if (error instanceof RefreshVerificationException) {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ message: 'Invalid refresh token' });
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Failed to refresh tokens' });
     }
-    const deviceInfo = getDeviceInfo(req);
-
-    const ip = req.ip;
-    const tokens = await this.authService.refreshToken(
-      refreshToken,
-      deviceInfo || ip,
-    );
-
-    console.log(tokens, 'tokens in refresh');
-
-    res.setRefreshToken(tokens.refreshToken);
-    res.setAccessToken(tokens.accessToken);
-
-    return res.status(HttpStatus.OK).json(tokens);
   }
 
   @Post('logout')
