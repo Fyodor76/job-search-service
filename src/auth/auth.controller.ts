@@ -130,8 +130,12 @@ export class AuthController {
       refreshToken,
       deviceInfo || ip,
     );
+
+    console.log(tokens, 'tokens in refresh');
+
     res.setRefreshToken(tokens.refreshToken);
     res.setAccessToken(tokens.accessToken);
+
     return res.status(HttpStatus.OK).json(tokens);
   }
 
