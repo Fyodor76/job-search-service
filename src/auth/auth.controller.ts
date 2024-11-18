@@ -106,25 +106,9 @@ export class AuthController {
       req.user as ProfileType,
       deviceInfo,
     );
-    console.log(tokens, 'tokens');
-    // res.setRefreshToken(tokens.refreshToken);
-    // res.setAccessToken(tokens.accessToken);
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      domain: '.job-search-service.ru',
-      maxAge: 60 * 24 * 60 * 60 * 1000,
-    });
-
-    res.cookie('accessToken', tokens.accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      domain: '.job-search-service.ru',
-      maxAge: 15 * 60 * 1000,
-    });
+    res.setRefreshToken(tokens.refreshToken);
+    res.setAccessToken(tokens.accessToken);
 
     setImmediate(() => {
       const urlRedirect = this.appConfigService.getBaseUrl();
@@ -162,19 +146,21 @@ export class AuthController {
     await this.authService.logout(userId, deviceInfo);
 
     const isProduction = !this.appConfigService.getIsDevelopment();
+
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: isProduction,
-      domain: '.job-search-service.ru',
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? '.job-search-service.ru' : 'localhost',
     });
+
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
-      domain: '.job-search-service.ru',
-      sameSite: 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? '.job-search-service.ru' : 'localhost',
     });
 
-    return res.status(HttpStatus.OK).json({ message: 'logout succesfully' });
+    return res.status(HttpStatus.OK).json({ message: 'Logout successfully' });
   }
 }

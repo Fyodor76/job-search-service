@@ -19,7 +19,8 @@ export class TokenMiddleware implements NestMiddleware {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'lax',
+        sameSite: !isProduction ? 'lax' : 'none',
+        domain: isProduction ? '.job-search-service.ru' : 'localhost',
         maxAge: 60 * 24 * 60 * 60 * 1000,
       });
     };
@@ -28,7 +29,8 @@ export class TokenMiddleware implements NestMiddleware {
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'lax',
+        sameSite: !isProduction ? 'lax' : 'none',
+        domain: isProduction ? '.job-search-service.ru' : 'localhost',
         maxAge: 15 * 60 * 1000,
       });
     };
