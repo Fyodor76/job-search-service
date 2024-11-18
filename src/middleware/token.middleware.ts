@@ -14,7 +14,7 @@ export class TokenMiddleware implements NestMiddleware {
     req.accessToken = accessToken || null;
 
     const isDevelopment = this.appConfigService.getIsDevelopment();
-
+    console.log(isDevelopment, 'is development');
     res.setRefreshToken = (refreshToken: string) => {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
