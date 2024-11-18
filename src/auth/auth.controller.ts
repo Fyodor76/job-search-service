@@ -113,16 +113,18 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: false,
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 60 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000,
     });
+
+    console.log(this.appConfigService.getBaseUrl(), 'url getBaseUrl');
 
     setImmediate(() => {
       const urlRedirect = this.appConfigService.getBaseUrl();
