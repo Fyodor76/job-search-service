@@ -126,10 +126,10 @@ export class AuthController {
 
     console.log(this.appConfigService.getBaseUrl(), 'url getBaseUrl');
 
-    setImmediate(() => {
+    setTimeout(() => {
       const urlRedirect = this.appConfigService.getBaseUrl();
       res.redirect(urlRedirect);
-    });
+    }, 3000);
   }
 
   @Post('refresh-token')
