@@ -114,6 +114,7 @@ export class AuthController {
       httpOnly: true,
       secure: false,
       sameSite: 'none',
+      domain: '.job-search-service.ru',
       maxAge: 60 * 24 * 60 * 60 * 1000,
     });
 
@@ -121,6 +122,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      domain: '.job-search-service.ru',
       maxAge: 15 * 60 * 1000,
     });
 
