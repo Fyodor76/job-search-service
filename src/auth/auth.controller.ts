@@ -122,7 +122,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
-      domain: '.job-search-service.ru',
+      domain: '.job-search-service.ru',v
       maxAge: 15 * 60 * 1000,
     });
 
@@ -163,11 +163,13 @@ export class AuthController {
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: isProduction,
+      domain: '.job-search-service.ru',
       sameSite: 'lax',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
+      domain: '.job-search-service.ru',
       sameSite: 'lax',
     });
 
