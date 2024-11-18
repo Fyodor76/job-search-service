@@ -113,7 +113,7 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: false,
-      sameSite: 'none',
+      sameSite: 'lax',
       domain: '.job-search-service.ru',
       maxAge: 60 * 24 * 60 * 60 * 1000,
     });
@@ -121,17 +121,15 @@ export class AuthController {
     res.cookie('accessToken', tokens.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       domain: '.job-search-service.ru',
       maxAge: 15 * 60 * 1000,
     });
 
-    console.log(this.appConfigService.getBaseUrl(), 'url getBaseUrl');
-
-    setTimeout(() => {
+    setImmediate(() => {
       const urlRedirect = this.appConfigService.getBaseUrl();
       res.redirect(urlRedirect);
-    }, 7000);
+    });
   }
 
   @Post('refresh-token')
