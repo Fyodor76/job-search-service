@@ -156,6 +156,8 @@ export class AuthController {
   async logout(@Req() req: any, @Res() res: Response) {
     const userId = req.user.userId;
     const deviceInfo = getDeviceInfo(req);
+    console.log(userId, 'userId');
+    console.log(deviceInfo, 'deviceInfo');
 
     await this.authService.logout(userId, deviceInfo);
 
