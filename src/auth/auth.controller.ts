@@ -150,14 +150,14 @@ export class AuthController {
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: isProduction ? 'lax' : 'none',
       domain: isProduction ? '.job-search-service.ru' : 'localhost',
     });
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: isProduction ? 'lax' : 'none',
       domain: isProduction ? '.job-search-service.ru' : 'localhost',
     });
 
