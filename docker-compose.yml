@@ -21,7 +21,7 @@ services:
         NEXT_PROD_URL: ${NEXT_PROD_URL}
         LOCAL_PROD_URL: ${LOCAL_PROD_URL}
         COOKIE_DOMAIN: ${COOKIE_DOMAIN}
-        
+
     ports:
       - '${APP_PORT}:8080'
     environment:
@@ -40,8 +40,8 @@ services:
       - REDIS_PROD_URL=${REDIS_PROD_URL}
       - NEXT_PROD_URL=${NEXT_PROD_URL}
       - NEXT_LOCAL_URL=${NEXT_LOCAL_URL}
-      - COOKIE_DOMAIN={COOKIE_DOMAIN}
-      
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN}
+
     networks:
       - my-network
     volumes:

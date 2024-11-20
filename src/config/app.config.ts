@@ -31,15 +31,21 @@ export class AppConfigService {
     return Number(this.configService.get<string>('DATABASE_PORT')) || 5432;
   }
 
+  get getCookieDomain(): string {
+    return this.configService.get<string>('COOKIE_DOMAIN');
+  }
+
   getCookie() {
     const isDevelopment = this.isDevelopment;
-    const domain = this.configService.get<string>('COOKIE_DOMAIN');
-    console.log(domain, 'domain ');
+
+    console.log(this.databasePort, 'databasePort');
+
+    console.log(this.getCookieDomain, 'domain ');
     return {
       httpOnly: true,
       secure: !isDevelopment,
       sameSite: 'lax' as const,
-      domain: !isDevelopment ? domain : 'localhost',
+      domain: !isDevelopment ? this.getCookieDomain : 'localhost',
     };
   }
 
