@@ -34,6 +34,7 @@ export class AppConfigService {
   getCookie() {
     const isDevelopment = this.isDevelopment;
     const domain = this.configService.get<string>('COOKIE_DOMAIN');
+    console.log(domain, 'domain ');
     return {
       httpOnly: true,
       secure: !isDevelopment,
