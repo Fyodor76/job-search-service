@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class OtpVerificationException extends HttpException {
+export class TokenValidationException extends HttpException {
   constructor() {
     super(
       {
         statusCode: HttpStatus.UNAUTHORIZED,
-        message: 'Invalid OTP',
+        message: 'Token validation failed',
         error: 'Unauthorized',
       },
       HttpStatus.UNAUTHORIZED,

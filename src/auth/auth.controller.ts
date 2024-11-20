@@ -20,6 +20,7 @@ import { AuthSwaggerDocs } from 'src/swaggerApi/auth.swagger';
 import { YandexProfileDTO } from './dto/YandexUserDto';
 import { AppConfigService } from 'src/config/app.config';
 import { RefreshVerificationException } from 'src/common/exceptions/refresh-verification.exception';
+import { JwtAuthGuard } from 'src/guards/JwtAuthGuard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -123,7 +124,7 @@ export class AuthController {
       const refreshToken = req.refreshToken;
 
       if (!refreshToken) {
-        throw new RefreshVerificationException(); // Исключение, если токена нет
+        throw new RefreshVerificationException();
       }
 
       const deviceInfo = getDeviceInfo(req);
@@ -157,30 +158,16 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   async logout(@Req() req: any, @Res() res: Response) {
     const userId = req.user.userId;
     const deviceInfo = getDeviceInfo(req);
-    console.log(userId, 'userId');
-    console.log(deviceInfo, 'deviceInfo');
+    const cookieObject = this.appConfigService.getCookie();
 
     await this.authService.logout(userId, deviceInfo);
 
-    const isDevelopment = this.appConfigService.getIsDevelopment();
-
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: !isDevelopment,
-      sameSite: 'lax',
-      domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
-    });
-
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: !isDevelopment,
-      sameSite: 'lax',
-      domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
-    });
+    res.clearCookie('accessToken', cookieObject);
+    res.clearCookie('refreshToken', cookieObject);
 
     return res.status(HttpStatus.OK).json({ message: 'Logout successfully' });
   }

@@ -8,8 +8,9 @@ export class RedisService {
   constructor(@InjectRedis() private readonly redisClient: Redis) {}
 
   // Установка значения с TTL
-  async set(key: string, value: string, ttl: number): Promise<void> {
-    await this.redisClient.set(key, value, 'EX', ttl);
+  async set(key: string, value: string, ttl: number): Promise<boolean> {
+    const result = await this.redisClient.set(key, value, 'EX', ttl);
+    return result === 'OK';
   }
 
   // Получение значения по ключу

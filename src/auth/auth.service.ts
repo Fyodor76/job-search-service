@@ -6,6 +6,10 @@ import { ProfileType } from 'src/types/profile';
 import { generateOtp } from 'src/helpers/generate-otp';
 import { RedisService } from 'src/redis/redis.service';
 import { OtpVerificationException } from 'src/common/exceptions/otp-verification.exception';
+import { OtpGenerationException } from 'src/common/exceptions/otp-generation-exception';
+import { RefreshVerificationException } from 'src/common/exceptions/refresh-verification.exception';
+import { TokenValidationException } from 'src/common/exceptions/token-validation-exception';
+import { UserNotFoundException } from 'src/common/exceptions/user-not-found-exception';
 
 @Injectable()
 export class AuthService {
@@ -17,206 +21,209 @@ export class AuthService {
   ) {}
 
   async sendOtp(email: string): Promise<string> {
-    const otp = generateOtp(); // Генерация OTP
-    await this.redisService.set(`otp:${email}`, otp, 60 * 10); // Сохранение OTP в Redis
-    return otp; // Возвращаем OTP для отправки по почте
+    try {
+      const otp = generateOtp();
+      const success = await this.redisService.set(`otp:${email}`, otp, 60 * 10);
+      if (!success) throw new OtpGenerationException();
+      return otp;
+    } catch (error) {
+      throw error instanceof HttpException
+        ? error
+        : new OtpGenerationException();
+    }
   }
 
-  async verifyOtpByTelegram(
-    chatId: string,
-    otp: string,
-    deviceInfo: any,
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    userId: string | number;
-  }> {
-    const savedOtp = await this.redisService.get(`otp:${chatId}`);
+  async verifyOtpByTelegram(chatId: string, otp: string, deviceInfo: any) {
+    try {
+      const savedOtp = await this.redisService.get(`otp:${chatId}`);
+      if (savedOtp !== otp) throw new OtpVerificationException();
 
-    if (savedOtp !== otp) {
-      throw new OtpVerificationException();
+      let user = await this.usersService.findByChatId(chatId);
+      if (!user) user = await this.usersService.createByChatId(chatId);
+
+      const tokens = this.jwtTokenService.generateTokens({
+        sub: user.id,
+        chatId: user.chatId,
+      });
+
+      await this.tokensService.saveRefreshToken(
+        user.id,
+        tokens.refreshToken,
+        deviceInfo,
+      );
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        userId: user.id,
+      };
+    } catch (error) {
+      throw error instanceof HttpException
+        ? error
+        : new HttpException('Failed to verify OTP', HttpStatus.UNAUTHORIZED);
     }
-
-    let user = await this.usersService.findByChatId(chatId);
-
-    if (!user) {
-      user = await this.usersService.createByChatId(chatId);
-    }
-
-    // Генерируем токены
-    const tokens = this.jwtTokenService.generateTokens({
-      sub: user.id,
-      chatId: user.chatId,
-    });
-
-    await this.tokensService.saveRefreshToken(
-      user.id,
-      tokens.refreshToken,
-      deviceInfo,
-    );
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      userId: user.id,
-    };
   }
 
-  async verifyOtpByEmail(
-    email: string,
-    otp: string,
-    deviceInfo: any,
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    userId: string | number;
-  }> {
-    const savedOtp = await this.redisService.get(`otp:${email}`); // Получаем OTP из Redis
+  async verifyOtpByEmail(email: string, otp: string, deviceInfo: any) {
+    try {
+      const savedOtp = await this.redisService.get(`otp:${email}`);
+      if (savedOtp !== otp) throw new OtpVerificationException();
 
-    if (savedOtp !== otp) {
-      throw new OtpVerificationException();
+      let user = await this.usersService.findByEmail(email);
+      if (!user) user = await this.usersService.createByEmail(email);
+
+      const tokens = this.jwtTokenService.generateTokens({
+        sub: user.id,
+        email: user.email,
+      });
+
+      await this.tokensService.saveRefreshToken(
+        user.id,
+        tokens.refreshToken,
+        deviceInfo,
+      );
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        userId: user.id,
+      };
+    } catch (error) {
+      throw error instanceof HttpException
+        ? error
+        : new HttpException(
+            'Failed to verify OTP by email',
+            HttpStatus.BAD_REQUEST,
+          );
     }
-
-    // Проверяем, существует ли пользователь
-    let user = await this.usersService.findByEmail(email);
-
-    // Если пользователь не существует, создаем нового
-    if (!user) {
-      user = await this.usersService.createByEmail(email);
-    }
-
-    // Генерируем токены
-    const tokens = this.jwtTokenService.generateTokens({
-      sub: user.id,
-      email: user.email,
-    });
-
-    // Сохраняем refresh токен
-    await this.tokensService.saveRefreshToken(
-      user.id,
-      tokens.refreshToken,
-      deviceInfo,
-    );
-
-    // Возвращаем access токен и ID пользователя
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      userId: user.id,
-    };
   }
 
   async yandexLogin(profile: ProfileType, deviceInfo: string) {
-    // Ищем пользователя по Yandex ID
-    let user = await this.usersService.findByYandexId(profile.yandexId);
+    try {
+      let user = await this.usersService.findByYandexId(profile.yandexId);
 
-    if (!user) {
-      // Если пользователь не найден по Yandex ID, проверяем по email
-      user = await this.usersService.findByEmail(profile.email);
+      if (!user) {
+        user = await this.usersService.findByEmail(profile.email);
 
-      if (user) {
-        // Если пользователь найден по email, обновляем его Yandex ID
-        await this.usersService.update(user, { yandexId: profile.yandexId });
-      } else {
-        // Если пользователя нет, создаем нового
-        user = await this.usersService.createFromYandexProfile(profile);
+        if (user) {
+          await this.usersService.update(user, { yandexId: profile.yandexId });
+        } else {
+          user = await this.usersService.createFromYandexProfile(profile);
+        }
       }
+
+      const tokens = this.jwtTokenService.generateTokens({
+        sub: user.id,
+        email: user.email,
+      });
+
+      await this.tokensService.saveRefreshToken(
+        user.id,
+        tokens.refreshToken,
+        deviceInfo,
+      );
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        userId: user.id,
+      };
+    } catch (error) {
+      throw error instanceof HttpException
+        ? error
+        : new HttpException(
+            'Failed to login with Yandex',
+            HttpStatus.BAD_REQUEST,
+          );
     }
-
-    // Генерация access и refresh токенов
-    const tokens = this.jwtTokenService.generateTokens({
-      sub: user.id,
-      email: user.email,
-    });
-
-    await this.tokensService.saveRefreshToken(
-      user.id,
-      tokens.refreshToken,
-      deviceInfo,
-    );
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      userId: user.id,
-    };
   }
 
   async googleLogin(profile: ProfileType, deviceInfo: string) {
-    // Ищем пользователя сначала по Google ID
-    let user = await this.usersService.findByGoogleId(profile.googleId);
+    try {
+      let user = await this.usersService.findByGoogleId(profile.googleId);
 
-    if (!user) {
-      // Если пользователь не найден по Google ID, проверяем по email
-      user = await this.usersService.findByEmail(profile.email);
+      if (!user) {
+        user = await this.usersService.findByEmail(profile.email);
 
-      if (user) {
-        // Если пользователь найден по email, обновляем его Google ID
-        await this.usersService.update(user, { googleId: profile.googleId });
-      } else {
-        // Если пользователя нет, создаем нового
-        user = await this.usersService.createFromGoogleProfile(profile);
+        if (user) {
+          await this.usersService.update(user, { googleId: profile.googleId });
+        } else {
+          user = await this.usersService.createFromGoogleProfile(profile);
+        }
       }
+
+      const tokens = this.jwtTokenService.generateTokens({
+        sub: user.id,
+        email: user.email,
+      });
+
+      await this.tokensService.saveRefreshToken(
+        user.id,
+        tokens.refreshToken,
+        deviceInfo,
+      );
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        userId: user.id,
+      };
+    } catch (error) {
+      throw error instanceof HttpException
+        ? error
+        : new HttpException(
+            'Failed to login with Google',
+            HttpStatus.BAD_REQUEST,
+          );
     }
-
-    // Генерация access и refresh токенов
-    const tokens = this.jwtTokenService.generateTokens({
-      sub: user.id,
-      email: user.email,
-    });
-
-    await this.tokensService.saveRefreshToken(
-      user.id,
-      tokens.refreshToken,
-      deviceInfo,
-    );
-
-    // Возвращаем access токен и ID пользователя
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      userId: user.id,
-    };
   }
 
   async refreshToken(refreshToken: string, deviceInfo: string) {
-    const tokenEntry =
-      await this.tokensService.findByRefreshToken(refreshToken);
+    try {
+      const tokenEntry =
+        await this.tokensService.findByRefreshToken(refreshToken);
 
-    if (tokenEntry !== null && !tokenEntry) {
-      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
+      if (!tokenEntry) throw new RefreshVerificationException();
+
+      const payload = this.jwtTokenService.validateToken(
+        refreshToken,
+        'refresh',
+      );
+      if (!payload) throw new TokenValidationException();
+
+      const user = await this.usersService.findById(payload.sub);
+      if (!user) throw new UserNotFoundException();
+
+      const tokens = this.jwtTokenService.generateTokens({
+        sub: user.id,
+        email: user.email,
+      });
+
+      await this.tokensService.saveRefreshToken(
+        user.id,
+        tokens.refreshToken,
+        deviceInfo,
+      );
+
+      return tokens;
+    } catch (error) {
+      throw error instanceof HttpException
+        ? error
+        : new HttpException('Failed to refresh token', HttpStatus.UNAUTHORIZED);
     }
-
-    // Проверяем валидность токена
-    const payload = this.jwtTokenService.validateToken(refreshToken, 'refresh');
-    if (!payload) {
-      throw new HttpException('Invalid refresh token', HttpStatus.UNAUTHORIZED);
-    }
-
-    // Ищем пользователя по ID из payload
-    const user = await this.usersService.findById(payload.sub);
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
-    }
-
-    // Генерируем новые access и refresh токены
-    const tokens = this.jwtTokenService.generateTokens({
-      sub: user.id,
-      email: user.email,
-    });
-
-    // Обновляем refresh токен в Redis для данного пользователя и устройства
-    await this.tokensService.saveRefreshToken(
-      user.id,
-      tokens.refreshToken, // Обновляем с новым refresh токеном
-      deviceInfo,
-    );
-
-    // Возвращаем новые токены
-    return tokens;
   }
 
-  async logout(userId: number, deviceInfo: string): Promise<void> {
-    await this.tokensService.deleteTokensByUserIdAndDevice(userId, deviceInfo);
+  async logout(userId: number, deviceInfo: string) {
+    try {
+      await this.tokensService.deleteTokensByUserIdAndDevice(
+        userId,
+        deviceInfo,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'Failed to logout',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

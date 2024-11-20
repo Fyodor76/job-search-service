@@ -31,6 +31,17 @@ export class AppConfigService {
     return Number(this.configService.get<string>('DATABASE_PORT')) || 5432;
   }
 
+  getCookie() {
+    const isDevelopment = this.isDevelopment;
+    const domain = this.configService.get<string>('COOKIE_DOMAIN');
+    return {
+      httpOnly: true,
+      secure: !isDevelopment,
+      sameSite: 'lax' as const,
+      domain: !isDevelopment ? domain : 'localhost',
+    };
+  }
+
   getBaseUrl(): string {
     return this.isDevelopment
       ? this.configService.get<string>('NEXT_LOCAL_URL')

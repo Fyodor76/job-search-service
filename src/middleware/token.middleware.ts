@@ -13,24 +13,18 @@ export class TokenMiddleware implements NestMiddleware {
     req.refreshToken = refreshToken || null;
     req.accessToken = accessToken || null;
 
-    const isDevelopment = this.appConfigService.getIsDevelopment();
-    console.log(isDevelopment, 'is development');
+    const cookieObject = this.appConfigService.getCookie();
+
     res.setRefreshToken = (refreshToken: string) => {
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'lax',
-        domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
+        ...cookieObject,
         maxAge: 60 * 24 * 60 * 60 * 1000,
       });
     };
 
     res.setAccessToken = (accessToken: string) => {
       res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'lax',
-        domain: !isDevelopment ? '.job-search-service.ru' : 'localhost',
+        ...cookieObject,
         maxAge: 15 * 60 * 1000,
       });
     };
