@@ -19,7 +19,7 @@ services:
         REDIS_LOCAL_URL: ${REDIS_LOCAL_URL}
         REDIS_PROD_URL: ${REDIS_PROD_URL}
         NEXT_PROD_URL: ${NEXT_PROD_URL}
-        LOCAL_PROD_URL: ${LOCAL_PROD_URL}
+        NEXT_LOCAL_URL: ${NEXT_LOCAL_URL}
         COOKIE_DOMAIN: ${COOKIE_DOMAIN}
 
     ports:
@@ -82,6 +82,8 @@ services:
       - REDIS_PROD_URL=${REDIS_PROD_URL}
       - BOT_TOKEN=${BOT_TOKEN}
       - BOT_TOKEN_TEST=${BOT_TOKEN_TEST}
+      - NEXT_PROD_URL=${NEXT_PROD_URL}
+      - NEXT_LOCAL_URL=${NEXT_LOCAL_URL}
     depends_on:
       - redis
 

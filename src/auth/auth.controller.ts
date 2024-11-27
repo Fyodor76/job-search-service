@@ -47,7 +47,7 @@ export class AuthController {
   async verifyOtp(
     @Body('email') email: string,
     @Body('otp') otp: string,
-    @Query('chatId') chatId: string,
+    @Body('chatId') chatId: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {

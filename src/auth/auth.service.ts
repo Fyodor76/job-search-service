@@ -35,6 +35,7 @@ export class AuthService {
 
   async verifyOtpByTelegram(chatId: string, otp: string, deviceInfo: any) {
     try {
+      console.log(otp, 'otp in service');
       const savedOtp = await this.redisService.get(`otp:${chatId}`);
       if (savedOtp !== otp) throw new OtpVerificationException();
 
@@ -60,7 +61,7 @@ export class AuthService {
     } catch (error) {
       throw error instanceof HttpException
         ? error
-        : new HttpException('Failed to verify OTP', HttpStatus.UNAUTHORIZED);
+        : new HttpException('Failed to verify OTP', HttpStatus.FORBIDDEN);
     }
   }
 

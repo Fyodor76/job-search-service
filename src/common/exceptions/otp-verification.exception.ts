@@ -8,7 +8,7 @@ export class OtpVerificationException extends HttpException {
         message: 'Invalid OTP',
         error: 'Unauthorized',
       },
-      HttpStatus.UNAUTHORIZED,
+      HttpStatus.FORBIDDEN,
     );
   }
 }

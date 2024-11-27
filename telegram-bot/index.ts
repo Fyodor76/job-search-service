@@ -8,15 +8,15 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
+const isProduction = process.env.NODE_ENV === 'production';
+console.log(isProduction);
 // Конфигурация Redis
 const redis = new Redis(process.env.REDIS_PROD_URL || 'redis://localhost:6379');
 
 // Конфигурация Telegram бота
-const TELEGRAM_TOKEN =
-  process.env.NODE_ENV === 'production'
-    ? process.env.BOT_TOKEN
-    : process.env.BOT_TOKEN_TEST;
+const TELEGRAM_TOKEN = isProduction
+  ? process.env.BOT_TOKEN
+  : process.env.BOT_TOKEN_TEST;
 
 const bot = new TelegramBot(TELEGRAM_TOKEN || '', { polling: true });
 
@@ -57,13 +57,28 @@ bot.on('callback_query', async (callbackQuery) => {
 
   // Сохранение OTP в Redis с ключом `otp:chatId` и временем жизни 5 минут
   await redis.set(`otp:${chatId}`, otp, 'EX', 600);
-
   // Ссылка для ввода OTP на вашем сайте
-  const siteUrl = `https://yourwebsite.com/verify?chatId=${chatId}`;
+  const siteUrl = isProduction
+    ? `${process.env.NEXT_PROD_URL}?chatId=${chatId}`.toString()
+    : `${process.env.NEXT_LOCAL_URL}?chatId=${chatId}`.toString();
+
+  const options: InlineKeyboardMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: 'Перейти на сайт',
+          url: siteUrl,
+        },
+      ],
+    ],
+  };
 
   bot.sendMessage(
     chatId || '',
-    `Ваш OTP: ${otp}. Введите его на сайте по следующей ссылке: ${siteUrl}`,
+    `Нажмите на кнопку ниже, чтобы ввести ваш OTP: ${otp}`,
+    {
+      reply_markup: options,
+    },
   );
 });
 
@@ -74,5 +89,5 @@ app.get('/health', (req, res) => {
 
 // Поднятие сервера
 app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
+  console.log(`App listening at http://localhost:${port}!!!!`);
 });
