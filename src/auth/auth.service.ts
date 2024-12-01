@@ -35,7 +35,6 @@ export class AuthService {
 
   async verifyOtpByTelegram(chatId: string, otp: string, deviceInfo: any) {
     try {
-      console.log(otp, 'otp in service');
       const savedOtp = await this.redisService.get(`otp:${chatId}`);
       if (savedOtp !== otp) throw new OtpVerificationException();
 
@@ -198,6 +197,7 @@ export class AuthService {
       const tokens = this.jwtTokenService.generateTokens({
         sub: user.id,
         email: user.email,
+        chatId: user.chatId,
       });
 
       await this.tokensService.saveRefreshToken(
